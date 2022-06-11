@@ -1,8 +1,10 @@
 ﻿using CashRegisterNStock.API.DTO.Categories;
 using CashRegisterNStock.API.DTO.Products;
+using CashRegisterNStock.API.Mappers;
 using CashRegisterNStock.DAL;
 using CashRegisterNStock.DAL.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace CashRegisterNStock.API.Services
 {
@@ -17,21 +19,51 @@ namespace CashRegisterNStock.API.Services
 
         public IEnumerable<CategoryIndexDTO> GetCategoriesWithProducts()
         {
-            return _dc.Categories.Include(c => c.Products).Select(c => new CategoryIndexDTO
+            return _dc.Categories.Include("Products").Select(c => c.ToCategoryIndexDTO()).ToList();
+        }
+
+        public int CreateCategory(CategoryAddDTO form)
+        {
+            if (_dc.Categories.ToList().Exists(c => c.Name == form.Name))
             {
-                Id = c.Id,
-                Name = c.Name,
-                Products = _dc.Products.Where(p => p.CategoryId == c.Id).Select(p => new ProductIndexDTO
-                {
-                    Id = p.Id,
-                    CategoryId = p.CategoryId,
-                    Name = p.Name,
-                    ImageURL = p.ImageUrl ?? "assets/products/no-image.png",
-                    Description = p.Description,
-                    Price = p.Price,
-                    Stock = p.Stock
-                }).ToList()
-            });
+                throw new ArgumentException($"The category \"{form.Name}\" already exists");
+            }
+
+            Category categoryToAdd = form.ToCategory();
+            _dc.Categories.Add(categoryToAdd);
+
+            _dc.SaveChanges();
+            return categoryToAdd.Id;
+        }
+
+        public int UpdateCategory(int categoryId, CategoryUpdateDTO form)
+        {
+            Category? category = _dc.Categories.Find(categoryId);
+            if (category is null)
+            {
+                throw new ArgumentException($"No category with the id \"{categoryId}\" was found");
+            }
+            if (_dc.Categories.ToList().Exists(c => c.Name == form.Name))
+            {
+                throw new ArgumentException($"The category \"{form.Name}\" already exists");
+            }
+            category.Name = form.Name;
+
+            _dc.SaveChanges();
+            return category.Id;
+        }
+
+        public int DeleteCategory(int categoryId)
+        {
+            Category? category = _dc.Categories.Find(categoryId);
+            if (category is null)
+            {
+                throw new ArgumentException($"No category with the id \"{categoryId}\" was found");
+            }
+            _dc.Categories.Remove(category);
+
+            _dc.SaveChanges();
+            return category.Id;
         }
     }
 }
