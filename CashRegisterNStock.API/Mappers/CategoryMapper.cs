@@ -30,5 +30,14 @@ namespace CashRegisterNStock.API.Mappers
                 Products = entity.Products.Select(p => p.ToProductIndexDTO()).ToList()
             };
         }
+
+        public static CategoryWithoutProductsDTO ToCategoryWithoutProductsDTO(this Category entity)
+        {
+            return new CategoryWithoutProductsDTO
+            {
+                Id = entity.Id,
+                Name = entity.Name
+            };
+        }
     }
 }

@@ -20,6 +20,12 @@ namespace CashRegisterNStock.API.Controllers
         {
             return Ok(_cs.GetCategoriesWithProducts());
         }
+        [Route("WithoutProducts")]
+        [HttpGet]
+        public IActionResult GetCategoriesWithoutProducts()
+        {
+            return Ok(_cs.GetCategoriesWithoutProducts());
+        }
 
         [HttpPost]
         public IActionResult CreateCategory(CategoryAddDTO form)

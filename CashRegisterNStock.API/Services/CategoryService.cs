@@ -4,7 +4,6 @@ using CashRegisterNStock.API.Mappers;
 using CashRegisterNStock.DAL;
 using CashRegisterNStock.DAL.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace CashRegisterNStock.API.Services
 {
@@ -20,6 +19,11 @@ namespace CashRegisterNStock.API.Services
         public IEnumerable<CategoryIndexDTO> GetCategoriesWithProducts()
         {
             return _dc.Categories.Include("Products").Select(c => c.ToCategoryIndexDTO()).ToList();
+        }
+
+        public IEnumerable<CategoryWithoutProductsDTO> GetCategoriesWithoutProducts()
+        {
+            return _dc.Categories.Select(c => c.ToCategoryWithoutProductsDTO());
         }
 
         public int CreateCategory(CategoryAddDTO form)
